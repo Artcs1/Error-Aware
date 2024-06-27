@@ -11,9 +11,8 @@ Visit our paper:
 Download .json files (annotations). Download [link](https://drive.google.com/drive/folders/1TA9ckrUyOQoYTUSal2k8nQ8xn8PX-z-n?usp=sharing)
 
 ```
-
+gdown --id 1TA9ckrUyOQoYTUSal2k8nQ8xn8PX-z-n
 ```
-
 
 ## Installation
 
