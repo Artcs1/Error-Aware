@@ -77,6 +77,7 @@ def get_statistics(ann, coco, imgIds, num_classes, map_imgs, name_categories, da
             g = [g['bbox'] for g in coco_anns]
             d = [d['bbox'] for d in anns]
 
+
             matrix = coco_mask.iou(g, d, [False])
 
             flag = False
