@@ -11,13 +11,16 @@ import cv2
 import argparse
 
 from utils import *
+from tqdm import tqdm
 
+
+dataset_path = '/home/jeffri/Desktop/'
 
 def get_correspondences(all_imgs, all_cocoimgs, imgIds, coco_imgIds):
 
     map_imgs = np.zeros(imgIds[len(imgIds)-1]+1) 
 
-    for img in all_imgs:
+    for img in tqdm(all_imgs):
         for coco_i in all_cocoimgs:
             if img['file_name'] == coco_i['file_name']:
                 map_imgs[img['id']] = coco_i['id']
@@ -57,11 +60,11 @@ def get_statistics(ann, coco, imgIds, num_classes, map_imgs, name_categories, da
     results = []
 
     discrepancies = 0
-
     dis_per_class = np.zeros(num_classes + 1)
+    os.makedirs('images', exist_ok=True)
 
-    for img in imgIds:
-        
+    for img in tqdm(imgIds):
+
         list_images = ann.loadImgs(img)
         list_images[0]['id'] = image_id
         images.append(list_images[0])
@@ -77,9 +80,11 @@ def get_statistics(ann, coco, imgIds, num_classes, map_imgs, name_categories, da
             g = [g['bbox'] for g in coco_anns]
             d = [d['bbox'] for d in anns]
 
+            if args.dataset == 'dota':
+                seg_g = [g['segmentation'] for g in coco_anns]
+                seg_d = [d['segmentation'] for d in anns]
 
             matrix = coco_mask.iou(g, d, [False])
-
             flag = False
 
             if len(matrix)!=0:
@@ -90,17 +95,18 @@ def get_statistics(ann, coco, imgIds, num_classes, map_imgs, name_categories, da
                     indexes = m.compute(-matrix.T)
 
                 file_name = ann.loadImgs(img)[0]['file_name']
-                if dataset == 'coco':
-                    if args.split == 'test': 
-                        I = cv2.imread('/home/jeffri/Desktop/coco/images/val2017/'+ file_name)
-                    else:
-                        I = cv2.imread('/home/jeffri/Desktop/coco/images/train2017/'+ file_name)
-                if dataset == 'google':
-                    I = cv2.imread('/home/jeffri/Desktop/google/images_v4/train/'+ file_name)
-                if dataset == 'dota':
-                    I = cv2.imread('/home/datasets/DOTA/train/images/'+ file_name)
 
-                if I is None:
+                if os.path.exists(dataset_path):
+                    if dataset == 'coco':
+                        if args.split == 'test': 
+                            I = cv2.imread(dataset_path+'/coco/images/val2017/'+ file_name)
+                        else:
+                            I = cv2.imread(dataset_path+'/coco/images/train2017/'+ file_name)
+                    if dataset == 'google':
+                        I = cv2.imread(dataset_path+'/google/images_v4/train/'+ file_name)
+                    if dataset == 'dota':
+                        I = cv2.imread(dataset_path+'/DOTA/train/images/'+ file_name)
+                else:
                     I = np.zeros((int(ann.loadImgs(img)[0]['height']),int(ann.loadImgs(img)[0]['width']),3))
 
                 for val in indexes:
@@ -128,49 +134,51 @@ def get_statistics(ann, coco, imgIds, num_classes, map_imgs, name_categories, da
                         br_error = np.sum(abs(br_coco-br_anns))
                         small_dimension = np.min(coco_anns[orig_ind]['bbox'][2:4])
 
-                        if True:#coco_area*2 > anns_area:#(coco_area*1.15)>  anns_area and (anns_area * 1.15) > coco_area: #br_error > 200 or tl_error >200:
 
-                            # ious, tipo, name, larea, small_d, tls_errors, brs_errors
-                            information[0].append(matrix[orig_ind][corr_ind])
-                            information[1].append('hbb')
-                            information[2].append(name_categories[cat])
-                            information[4].append(small_dimension)
-                            information[5].append(br_error)
-                            information[6].append(tl_error)
-                            area = coco_area
+                        elements = [matrix[orig_ind][corr_ind], 'hbb', name_categories[cat],'dimension', small_dimension, br_error, tl_error]
+                        for i in range(len(elements)):
+                            information[i].append(elements[i])
+                        area = coco_area
 
-                            if area <= 32*32:
-                                information[3].append('small')
-                            elif area <= 96*96:
-                                information[3].append('medium')
+                        if area <= 32*32:
+                            information[3].append('small')
+                        elif area <= 96*96:
+                            information[3].append('medium')
+                        else:
+                            information[3].append('large') 
+
+                        if matrix[orig_ind][corr_ind] < 1.0:
+
+                            if args.dataset == 'dota':
+                                pts_g = np.array(seg_g[orig_ind][0]).reshape(-1,1,2)
+                                pts_d = np.array(seg_d[corr_ind][0]).reshape(-1,1,2)
+                                cv2.polylines(I, [pts_g], True, (0,0,255), 2)
+                                cv2.polylines(I, [pts_d], True, (0,255,0), 2)
                             else:
-                                information[3].append('large') 
-
-                            if matrix[orig_ind][corr_ind] < 1.0:
-
-                                flag = True
                                 cv2.rectangle(I, (int(g[orig_ind][0]), int(g[orig_ind][1])) , (int(g[orig_ind][0] + g[orig_ind][2]), int(g[orig_ind][1] + g[orig_ind][3])) , (0,0,255), 2)
                                 cv2.rectangle(I, (int(d[corr_ind][0]), int(d[corr_ind][1])) , (int(d[corr_ind][0] + d[corr_ind][2]), int(d[corr_ind][1] + d[corr_ind][3])) , (0,255,0), 2)
-                                dis_per_class[cat]+=1
-                                discrepancies+=1
 
-                            orig_ann['id'] = annotation_id
-                            corr_ann['id'] = annotation_id
+                            dis_per_class[cat]+=1
+                            discrepancies+=1
 
-                            orig_ann['image_id'] = image_id
-                            corr_ann['image_id'] = image_id
+                        orig_ann['id'] = annotation_id
+                        corr_ann['id'] = annotation_id
 
-                            orig_ann['segmentation'] = [[10., 20., 25. ,30., 15., 20. , 26. ,30.]]
-                            corr_ann['segmentation'] = [[10., 20., 25. ,30., 15., 20. , 26. ,30.]]
+                        orig_ann['image_id'] = image_id
+                        corr_ann['image_id'] = image_id
 
-                            annotations_original.append(orig_ann)
-                            annotations_corrected.append(corr_ann)
+                        orig_ann['segmentation'] = [[10., 20., 25. ,30., 15., 20. , 26. ,30.]]
+                        corr_ann['segmentation'] = [[10., 20., 25. ,30., 15., 20. , 26. ,30.]]
 
-                            results.append({"image_id": image_id, "category_id": cat, "bbox": corr_ann['bbox'], "score": 1.0})
-                            annotation_id+=1
+                        annotations_original.append(orig_ann)
+                        annotations_corrected.append(corr_ann)
 
-                if show_images and flag:
-                
+                        results.append({"image_id": image_id, "category_id": cat, "bbox": corr_ann['bbox'], "score": 1.0})
+                        annotation_id+=1
+
+                if show_images:
+               
+                    #cv2.imwrite('images/image'+str(img)+'_'+str(cat)+'.png', I)
                     cv2.imshow('image', I)
                     cv2.waitKey(0)
                     cv2.destroyAllWindows()
@@ -180,21 +188,30 @@ def get_statistics(ann, coco, imgIds, num_classes, map_imgs, name_categories, da
     coco_format_original['images']  = images
     coco_format_corrected['images'] = images
 
-
     coco_format_original['annotations']  = annotations_original
     coco_format_corrected['annotations'] = annotations_corrected
-    
+
+    os.makedirs('output', exist_ok=True)
+
+    print('Total discrepancies:', discrepancies)
+
+    for category, dis_class in zip(name_categories, dis_per_class):
+        if category == '':
+            category = 'background'
+        print(category.ljust(19)+': '+str(dis_class))
+
+   
+    print('Creating json formated as coco of original annotations ...')
     with open("output/"+dataset+"_original_"+args.split+".json", "w") as outfile:
         json.dump(coco_format_original, outfile)
+
     
+    print('Creating json formated as coco of corrected annotations ...')
     with open("output/"+dataset+"_corrected_"+args.split+".json", "w") as outfile:
         json.dump(coco_format_corrected, outfile)
 
-    with open("output/"+dataset+"_sim_results_"+args.split+".json", "w") as outfile:
-        json.dump(results, outfile)
-
-    print(discrepancies)
-    print(dis_per_class)
+    #with open("output/"+dataset+"_sim_results_"+args.split+".json", "w") as outfile:
+    #    json.dump(results, outfile)
 
     return information[0], information[1], information[2], information[3], information[4], information[5], information[6]# ious, tipo, name, larea, small_d, tls_errors, brs_errors
 
@@ -279,4 +296,5 @@ def main():
 
 if __name__ == '__main__':
     main()   
+
 
