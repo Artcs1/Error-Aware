@@ -256,20 +256,20 @@ def main():
     args = parser.parse_args()
 
     if args.dataset == 'coco':
-        ann_file = './coco/instances_'+args.split+'.json'    
-        coco_file = './coco/instancescoco_'+args.split+'.json'
+        corrected_file = './coco/instances_'+args.split+'.json'    
+        original_file = './coco/instancescoco_'+args.split+'.json'
         name_categories = ['', 'car', 'chair', 'cup', 'person','traffic light']
     elif args.dataset == 'google':
-        ann_file = './google/instances_'+args.split+'.json'    
-        coco_file = './google/instancesgoogle_'+args.split+'.json'
+        corrected_file = './google/instances_'+args.split+'.json'    
+        original_file = './google/instancesgoogle_'+args.split+'.json'
         name_categories = ['', 'building', 'car', 'dog', 'flower','person']
     elif args.dataset == 'dota':
-        ann_file = './DOTA/DOTA1.5_'+args.split+'.json'    
-        coco_file = './DOTA/DOTA_'+args.split+'.json'
+        corrected_file = './DOTA/DOTA1.5_'+args.split+'.json'    
+        original_file = './DOTA/DOTA_'+args.split+'.json'
         name_categories = ['', 'plane', 'baseball-diamond', 'bridge', 'ground-track-field', 'small-vehicle', 'large-vehicle', 'ship', 'tennis-court', 'basketball-court', 'storage-tank',  'soccer-ball-field', 'roundabout', 'harbor', 'swimming-pool', 'helicopter', 'container-crane']
 
-    ann = COCO(ann_file)
-    coco = COCO(coco_file)    
+    ann = COCO(corrected_file)
+    coco = COCO(original_file)    
 
     cats = ann.loadCats(ann.getCatIds())
     classes = cats
