@@ -18,3 +18,14 @@ unzip error-aware.zip
 ## Installation
 
 ## Cite our work
+
+```
+@InProceedings{Llerena_2025_WACV,
+    author    = {Llerena, Jeffri Murrugarra and Jung, Claudio R.},
+    title     = {Noise-Aware Evaluation of Object Detectors},
+    booktitle = {Proceedings of the Winter Conference on Applications of Computer Vision (WACV)},
+    month     = {February},
+    year      = {2025},
+    pages     = {9304-9313}
+}
+```
