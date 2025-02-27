@@ -17,6 +17,12 @@ unzip data.zip
 
 ## Installation
 
+```
+pip install numpy
+pip install cython
+```
+
+
 ## Cite our work
 
 ```
