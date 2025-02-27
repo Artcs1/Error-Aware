@@ -1,4 +1,4 @@
-# Error-aware Evaluation of Object Detectors (WACV 2025)
+# Noisy-aware Evaluation of Object Detectors (WACV 2025)
 
 This is the official repository of the WACV 2025 paper named "Error-aware Evaluation of Object Detectors".
 
@@ -11,8 +11,8 @@ Visit our paper:
 Download .json files (annotations). Download [link](https://drive.google.com/drive/folders/1TA9ckrUyOQoYTUSal2k8nQ8xn8PX-z-n?usp=sharing) and unzip them.
 
 ```
-gdown 1vcIX4HuhBt8qBBQdNzjNbXA1O88IChth
-unzip error-aware.zip
+gdown 1HRV-ZSZGKiW7lEFKKkUvfaQDpEX7JW4w
+unzip data.zip
 ```
 
 ## Installation
