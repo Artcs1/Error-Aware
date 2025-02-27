@@ -1,10 +1,10 @@
-# Error-aware Evaluation of Object Detectors
+# Error-aware Evaluation of Object Detectors (WACV 2025)
 
-This is the official repository of the _ named "Error-aware Evaluation of Object Detectors".
+This is the official repository of the WACV 2025 paper named "Error-aware Evaluation of Object Detectors".
 
 Visit our paper:
 
-[link]()
+[link](https://openaccess.thecvf.com/content/WACV2025/papers/Llerena_Noise-Aware_Evaluation_of_Object_Detectors_WACV_2025_paper.pdf)
 
 ## Required files
 
