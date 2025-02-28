@@ -18,8 +18,7 @@ unzip data.zip
 ## Installation
 
 ```
-pip install numpy
-pip install cython
+pip install -r requirements.txt
 ```
 
 
